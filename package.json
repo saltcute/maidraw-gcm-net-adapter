@@ -1,0 +1,58 @@
+{
+    "name": "maidraw-gcm-net-adapter",
+    "version": "0.0.1",
+    "description": "Score adapter for official maimaiDX/CHUNITHM/ONGEKI net",
+    "main": "dist/index.js",
+    "exports": {
+        "./maimai": "./dist/maimai.js",
+        "./chunithm": "./dist/chunithm.js",
+        "./ongeki": "./dist/ongeki.js"
+    },
+    "files": [
+        "dist/"
+    ],
+    "scripts": {
+        "build": "tsc && tsc-alias",
+        "clean": "rimraf dist/*",
+        "make": "npm run clean && npm run format && npm run lint && npm run build",
+        "format": "biome format --write",
+        "lint": "biome lint --write",
+        "test": "export LOG_LEVEL=debug && npm run make && node ./test/test.js"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/saltcute/maidraw-gcm-net-adapter.git"
+    },
+    "keywords": [
+        "maidraw"
+    ],
+    "author": "saltcute",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/saltcute/maidraw-gcm-net-adapter/issues"
+    },
+    "homepage": "https://github.com/saltcute/maidraw-gcm-net-adapter#readme",
+    "dependencies": {
+        "@saltcute/cache": "^1.0.5",
+        "cheerio": "^1.1.2",
+        "gcm-database": "^1.0.3",
+        "lodash": "^4.17.21",
+        "openpgp": "^6.2.2",
+        "rg-stats": "^1.2.1",
+        "string-similarity": "^4.0.4"
+    },
+    "peerDependencies": {
+        "kasumi.js": ">=0.6.0",
+        "maidraw": "^0.13.5"
+    },
+    "devDependencies": {
+        "@biomejs/biome": "^2.5.0",
+        "@types/bunyan": "^1.8.11",
+        "@types/lodash": "^4.17.20",
+        "@types/memory-cache": "^0.2.6",
+        "@types/string-similarity": "^4.0.2",
+        "rimraf": "^6.1.3",
+        "tsc-alias": "^1.8.17",
+        "typescript": "^6.0.3"
+    }
+}
