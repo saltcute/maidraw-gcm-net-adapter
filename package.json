@@ -1,6 +1,6 @@
 {
     "name": "maidraw-gcm-net-adapter",
-    "version": "1.0.3",
+    "version": "1.0.4",
     "description": "Score adapter for official maimaiDX/CHUNITHM/ONGEKI net",
     "main": "dist/index.js",
     "exports": {
