@@ -43,7 +43,6 @@
         "string-similarity": "^4.0.4"
     },
     "peerDependencies": {
-        "kasumi.js": ">=0.6.0",
         "maidraw": "^0.13.5"
     },
     "devDependencies": {

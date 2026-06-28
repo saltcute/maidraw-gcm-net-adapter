@@ -2,7 +2,6 @@ import { Crypto } from "@common/crypto";
 import { FailedToAuthenticateError, FailedToDecryptError } from "@common/error";
 import { type Difficulty, Type } from "gcm-database/maimai";
 import type { Database } from "gcm-database-otogedb/maimai";
-import type Kasumi from "kasumi.js";
 import { BaseScoreAdapter, FailedToFetchError } from "maidraw";
 import { AchievementTypes, ComboLamp, type MaimaiScoreAdapter, type Score, SyncLamp } from "maidraw/maimai";
 import { MaimaiDXRate } from "rg-stats";
@@ -10,7 +9,7 @@ import * as MaimaiDxNetScraper from "./lib/scraper/maimaidx";
 
 export class MaimaiDxNetAdapter extends BaseScoreAdapter implements MaimaiScoreAdapter {
     async getPlayerInfo(token: string) {
-        if (!Crypto.global) Crypto.global = await Crypto.new(this.kasumi);
+        if (!Crypto.global) Crypto.global = await Crypto.new();
         const decrypted = await Crypto.global.decrypt(token);
         if (!decrypted) return { err: FailedToDecryptError };
         const { segaId, password } = decrypted;
@@ -42,21 +41,17 @@ export class MaimaiDxNetAdapter extends BaseScoreAdapter implements MaimaiScoreA
         return { err: new FailedToFetchError("maidraw.adapter.gcm-net", "profile picture", "Unsupported") };
     }
     private database: Database;
-    private kasumi: Kasumi;
     constructor({
-        kasumi,
         database,
     }: {
-        kasumi: Kasumi;
         database: Database;
     }) {
         super({ name: "maimaidx-net-adapter" });
-        this.kasumi = kasumi;
         this.database = database;
     }
 
     async getPlayerBest50(token: string) {
-        if (!Crypto.global) Crypto.global = await Crypto.new(this.kasumi);
+        if (!Crypto.global) Crypto.global = await Crypto.new();
         const decrypted = await Crypto.global.decrypt(token);
         if (!decrypted) return { err: new FailedToDecryptError() };
         const { segaId, password } = decrypted;

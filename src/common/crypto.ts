@@ -1,49 +1,31 @@
-import os from "node:os";
-import type Kasumi from "kasumi.js";
-
-interface KasumiConfig {
-    "maidraw-gcm-net-adapter:auth.pgpkey"?: {
-        key: {
-            privateKey: string;
-            passphrase: string;
-            publicKey: string;
-        };
-        expire: number;
-    };
-}
+import { existsSync, readFileSync, unlinkSync, writeFileSync, mkdirSync} from "node:fs";
+import os, { homedir } from "node:os";
+import { join } from "node:path";
+import openpgp from "openpgp";
 
 export class Crypto {
     public static global?: Crypto;
 
-    private pgpKey!: {
-        privateKey: string;
-        passphrase: string;
-        publicKey: string;
-    };
-    private constructor(
-        private kasumi: Kasumi<KasumiConfig>,
-        PgpKey?: {
-            privateKey: string;
-            passphrase: string;
-            publicKey?: string;
-        },
-    ) {
-        if (PgpKey)
-            this.pgpKey = {
-                privateKey: PgpKey.privateKey,
-                passphrase: PgpKey.passphrase,
-                publicKey: PgpKey.publicKey || "",
-            };
+    privateKey!: string;
+    publicKey!: string;
+    passphrase!: string;
+    private constructor(privateKey?: string, passphrase?: string, publicKey?: string) {
+        if (privateKey) this.privateKey = privateKey;
+        if (passphrase) this.passphrase = passphrase;
+        if (publicKey) this.publicKey = publicKey;
     }
 
+    private readonly keyPath = join(homedir(), ".config", "maidraw", "gcm-net-adapter", "pgpkey");
+    private readonly privateKeyPath = join(this.keyPath, "private.asc");
+    private readonly publicKeyPath = join(this.keyPath, "public.asc");
+    private readonly passphrasePath = join(this.keyPath, "passphrase.txt");
     private async init() {
-        const openpgp = await import("openpgp");
-        if (!this.pgpKey) {
-            const key = await this.kasumi.config.getOne("maidraw-gcm-net-adapter:auth.pgpkey");
-            if (key && Date.now() < key.expire) {
-                this.pgpKey = key.key;
+        if (!this.privateKey) {
+            if (existsSync(this.privateKeyPath)) {
+                const key = readFileSync(this.privateKeyPath, { encoding: "utf-8" });
+                this.privateKey = key;
             } else {
-                const passphrase = os.hostname();
+                const passphrase = this.passphrase || os.hostname();
                 const { privateKey, publicKey } = await openpgp.generateKey({
                     // biome-ignore lint/style/useNamingConvention: openpgp naming convention
                     userIDs: {
@@ -53,36 +35,34 @@ export class Crypto {
                     passphrase,
                     format: "armored",
                 });
-                this.pgpKey = {
-                    publicKey,
-                    privateKey,
-                    passphrase,
-                };
-                this.kasumi.config.set("maidraw-gcm-net-adapter:auth.pgpkey", {
-                    key: this.pgpKey,
-                    expire: Date.now() + 30 * 24 * 60 * 60 * 1000,
-                });
-                await this.kasumi.config.syncEssential();
+                this.passphrase = passphrase;
+                this.privateKey = privateKey;
+                this.publicKey = publicKey;
+                
+                mkdirSync(this.keyPath, {recursive: true});
+                writeFileSync(this.privateKeyPath, privateKey);
+                writeFileSync(this.publicKeyPath, publicKey);
+                writeFileSync(this.passphrasePath, passphrase);
             }
         } else {
-            if (!this.pgpKey.publicKey) {
+            if (!this.publicKey) {
                 const privateKey = await openpgp.readPrivateKey({
-                    armoredKey: this.pgpKey.privateKey,
+                    armoredKey: this.privateKey,
                 });
                 const publicKey = privateKey.toPublic();
-                this.pgpKey.publicKey = publicKey.armor();
+                this.publicKey = publicKey.armor();
             }
         }
     }
 
     public getPublicKey() {
-        return this.pgpKey.publicKey;
+        return this.publicKey;
     }
 
     public async encrypt(payload: Record<string, string>) {
         const openpgp = await import("openpgp");
         const publicKey = await openpgp.readKey({
-            armoredKey: this.pgpKey.publicKey,
+            armoredKey: this.publicKey,
         });
         const encrypted = await openpgp.encrypt({
             message: await openpgp.createMessage({
@@ -99,9 +79,9 @@ export class Crypto {
             const openpgp = await import("openpgp");
             const privateKey = await openpgp.decryptKey({
                 privateKey: await openpgp.readPrivateKey({
-                    armoredKey: this.pgpKey.privateKey,
+                    armoredKey: this.privateKey,
                 }),
-                passphrase: this.pgpKey.passphrase,
+                passphrase: this.passphrase,
             });
             const message = await openpgp.readMessage({
                 armoredMessage: encrypted,
@@ -117,11 +97,13 @@ export class Crypto {
     }
 
     public resetStoredKey() {
-        this.kasumi.config.set("maidraw-gcm-net-adapter:auth.gpgkey", undefined);
+        unlinkSync(this.privateKeyPath);
+        unlinkSync(this.publicKeyPath);
+        unlinkSync(this.passphrasePath);
     }
 
-    public static async new(kasumi: Kasumi, PgpKey?: { privateKey: string; passphrase: string; publicKey?: string }) {
-        const instance = new Crypto(kasumi, PgpKey);
+    public static async new(privateKey?: string, passphrase?: string, publicKey?: string) {
+        const instance = new Crypto(privateKey, passphrase, publicKey);
         await instance.init();
         return instance;
     }
