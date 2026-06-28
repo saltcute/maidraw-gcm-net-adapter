@@ -46,7 +46,7 @@
         "maidraw": "^0.13.5"
     },
     "devDependencies": {
-        "@biomejs/biome": "^2.5.0",
+        "@biomejs/biome": "2.5.0",
         "@types/bunyan": "^1.8.11",
         "@types/lodash": "^4.17.20",
         "@types/memory-cache": "^0.2.6",
