@@ -11,7 +11,7 @@ export class MaimaiDxNetAdapter extends BaseScoreAdapter implements MaimaiScoreA
     async getPlayerInfo(token: string) {
         if (!Crypto.global) Crypto.global = await Crypto.new();
         const decrypted = await Crypto.global.decrypt(token);
-        if (!decrypted) return { err: FailedToDecryptError };
+        if (!decrypted) return { err: new FailedToDecryptError() };
         const { segaId, password } = decrypted;
         const cached = await this.cache.get(`profile-${segaId}`);
         if (cached?.data) return cached;
