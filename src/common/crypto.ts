@@ -17,13 +17,19 @@ export class Crypto {
 
     private readonly keyPath = join(homedir(), ".config", "maidraw", "gcm-net-adapter", "pgpkey");
     private readonly privateKeyPath = join(this.keyPath, "private.asc");
-    private readonly publicKeyPath = join(this.keyPath, "public.asc");
     private readonly passphrasePath = join(this.keyPath, "passphrase.txt");
     private async init() {
         if (!this.privateKey) {
-            if (existsSync(this.privateKeyPath)) {
-                const key = readFileSync(this.privateKeyPath, { encoding: "utf-8" });
-                this.privateKey = key;
+            if (existsSync(this.privateKeyPath) && existsSync(this.passphrasePath)) {
+                const privateKey = readFileSync(this.privateKeyPath, { encoding: "utf-8" });
+                const passphrase = readFileSync(this.passphrasePath, { encoding: "utf-8" });
+                this.privateKey = privateKey;
+                this.passphrase = passphrase;
+                const privateKeyInstance = await openpgp.readPrivateKey({
+                    armoredKey: this.privateKey,
+                });
+                const publicKey = privateKeyInstance.toPublic();
+                this.publicKey = publicKey.armor();
             } else {
                 const passphrase = this.passphrase || os.hostname();
                 const { privateKey, publicKey } = await openpgp.generateKey({
@@ -41,7 +47,6 @@ export class Crypto {
                 
                 mkdirSync(this.keyPath, {recursive: true});
                 writeFileSync(this.privateKeyPath, privateKey);
-                writeFileSync(this.publicKeyPath, publicKey);
                 writeFileSync(this.passphrasePath, passphrase);
             }
         } else {
