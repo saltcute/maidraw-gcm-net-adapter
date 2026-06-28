@@ -1,4 +1,4 @@
-import { existsSync, readFileSync, unlinkSync, writeFileSync, mkdirSync} from "node:fs";
+import { existsSync, readFileSync, unlinkSync, writeFileSync, mkdirSync } from "node:fs";
 import os, { homedir } from "node:os";
 import { join } from "node:path";
 import openpgp from "openpgp";
@@ -44,8 +44,8 @@ export class Crypto {
                 this.passphrase = passphrase;
                 this.privateKey = privateKey;
                 this.publicKey = publicKey;
-                
-                mkdirSync(this.keyPath, {recursive: true});
+
+                mkdirSync(this.keyPath, { recursive: true });
                 writeFileSync(this.privateKeyPath, privateKey);
                 writeFileSync(this.passphrasePath, passphrase);
             }
@@ -103,7 +103,6 @@ export class Crypto {
 
     public resetStoredKey() {
         unlinkSync(this.privateKeyPath);
-        unlinkSync(this.publicKeyPath);
         unlinkSync(this.passphrasePath);
     }
 
