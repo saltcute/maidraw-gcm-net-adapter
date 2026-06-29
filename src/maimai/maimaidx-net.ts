@@ -6,8 +6,11 @@ import { BaseScoreAdapter, FailedToFetchError } from "maidraw";
 import { AchievementTypes, ComboLamp, type MaimaiScoreAdapter, type Score, SyncLamp } from "maidraw/maimai";
 import { MaimaiDXRate } from "rg-stats";
 import * as MaimaiDxNetScraper from "./lib/scraper/maimaidx";
+import type { NetScore } from "./lib/scraper/types";
 
 export class MaimaiDxNetAdapter extends BaseScoreAdapter implements MaimaiScoreAdapter {
+    protected scraper = MaimaiDxNetScraper;
+
     async getPlayerInfo(token: string) {
         if (!Crypto.global) Crypto.global = await Crypto.new();
         const decrypted = await Crypto.global.decrypt(token);
@@ -15,14 +18,14 @@ export class MaimaiDxNetAdapter extends BaseScoreAdapter implements MaimaiScoreA
         const { segaId, password } = decrypted;
         const cached = await this.cache.get(`profile-${segaId}`);
         if (cached) return { data: cached };
-        const cookies = await MaimaiDxNetScraper.login(segaId, password);
+        const cookies = await this.scraper.login(segaId, password);
         if (!cookies)
             return {
                 err: new FailedToAuthenticateError(),
             };
         const { data: b50, err } = await this.getPlayerBest50(token);
         if (err) return { err };
-        const profile = await MaimaiDxNetScraper.getProfile(cookies);
+        const profile = await this.scraper.getProfile(cookies);
         if (!profile) return { err: new FailedToFetchError("maidraw.adapter.gcm-net", "profile") };
         const res = {
             name: profile.name,
@@ -42,11 +45,13 @@ export class MaimaiDxNetAdapter extends BaseScoreAdapter implements MaimaiScoreA
     }
     private database: Database;
     constructor({
+        name = "maimaidx-net-adapter",
         database,
     }: {
+        name?: string;
         database: Database;
     }) {
-        super({ name: "maimaidx-net-adapter" });
+        super({ name });
         this.database = database;
     }
 
@@ -57,9 +62,9 @@ export class MaimaiDxNetAdapter extends BaseScoreAdapter implements MaimaiScoreA
         const { segaId, password } = decrypted;
         const cached = await this.cache.get(`best50-${segaId}`);
         if (cached) return { data: cached as { new: Score[]; old: Score[] } };
-        const cookies = await MaimaiDxNetScraper.login(segaId, password);
+        const cookies = await this.scraper.login(segaId, password);
         if (!cookies) return { err: new FailedToAuthenticateError() };
-        const rawBest50 = await MaimaiDxNetScraper.getBest50(cookies, this.database);
+        const rawBest50 = await this.scraper.getBest50(cookies, this.database);
         const b50 = {
             new: rawBest50.new
                 .map((v) => this.toMaidrawScore(v))
@@ -90,7 +95,7 @@ export class MaimaiDxNetAdapter extends BaseScoreAdapter implements MaimaiScoreA
         else if (achivement >= 500000) return AchievementTypes.C;
         else return AchievementTypes.D;
     }
-    private toMaidrawScore(score: MaimaiDxNetScraper.NetScore): Score {
+    private toMaidrawScore(score: NetScore): Score {
         const level =
             score.dbChart?.internalLevel ??
             (() => {

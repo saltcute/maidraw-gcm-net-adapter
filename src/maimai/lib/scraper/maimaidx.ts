@@ -2,25 +2,10 @@ import * as tls from "node:tls";
 import { Cache } from "@saltcute/cache";
 import * as Cheerio from "cheerio";
 import { Difficulty, Type } from "gcm-database/maimai";
-import type { Chart, Database } from "gcm-database-otogedb/maimai";
+import type { Database } from "gcm-database-otogedb/maimai";
 import { Agent, fetch as nodeFetch } from "undici";
 import { CHAINED_CERTIFICATE } from "../chainedCertificate";
-
-export interface WorkingChart {
-    name: string;
-    level: string;
-    difficulty: string;
-    mode: string;
-    dbChart?: Chart;
-}
-export interface NetScore extends WorkingChart {
-    sync: string;
-    combo: string;
-    achievement: string;
-    score: number;
-    dxScore: number;
-    maxDxScore: number;
-}
+import type { NetScore } from "./types";
 
 const UA = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36";
 
