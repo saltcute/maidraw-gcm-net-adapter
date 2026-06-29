@@ -14,7 +14,7 @@ export class MaimaiDxNetAdapter extends BaseScoreAdapter implements MaimaiScoreA
         if (!decrypted) return { err: new FailedToDecryptError() };
         const { segaId, password } = decrypted;
         const cached = await this.cache.get(`profile-${segaId}`);
-        if (cached?.data) return cached;
+        if (cached) return { data: cached };
         const cookies = await MaimaiDxNetScraper.login(segaId, password);
         if (!cookies)
             return {
