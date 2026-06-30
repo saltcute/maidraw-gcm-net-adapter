@@ -35,7 +35,7 @@
         "@saltcute/cache": "^1.0.5",
         "cheerio": "^1.1.2",
         "gcm-database": "^1.0.3",
-        "gcm-database-otogedb": "^1.0.0",
+        "gcm-database-otogedb": "^1.0.2",
         "lodash": "^4.17.21",
         "openpgp": "^6.2.2",
         "rg-stats": "^1.2.1",
