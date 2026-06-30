@@ -161,7 +161,7 @@ export async function getScores(difficulty: number, cookies: Record<string, stri
     return charts;
 }
 
-const NEW_SCORE_VERSION = 26000;
+const NEW_SCORE_VERSION = 25500;
 export async function getBest50(cookies: Record<string, string>, database: Database) {
     const promises = [];
     for (const difficulty of Object.values(Difficulty)) {
