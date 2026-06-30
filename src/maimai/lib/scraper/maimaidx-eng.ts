@@ -174,7 +174,7 @@ export async function getBest50(cookies: Record<string, string>, database: Datab
             [Difficulty.RE_MASTER]: 4,
             [Difficulty.UTAGE]: 10,
         };
-        if (difficulty === Difficulty.EASY) continue;
+        if (difficulty === Difficulty.EASY || difficulty === Difficulty.UTAGE) continue;
         promises.push(
             getScores(difficultyMap[difficulty], cookies).then((scores) => {
                 return scores
