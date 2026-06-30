@@ -191,7 +191,7 @@ export async function getBest50(cookies: Record<string, string>, database: Datab
                                 type: v.mode.toLowerCase() === "dx" ? Type.DELUXE : Type.STANDARD,
                             })
                             .then(({ data }) => {
-                                if (data[0].chart) v.dbChart = data[0].chart;
+                                if (data[0]?.chart) v.dbChart = data[0].chart;
                                 return v;
                             });
                     });
