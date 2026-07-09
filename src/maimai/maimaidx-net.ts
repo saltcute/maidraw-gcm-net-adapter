@@ -1,5 +1,6 @@
 import { Crypto } from "@common/crypto";
-import { FailedToDecryptError } from "@common/error";
+import { AllNetMaintenanceError, FailedToDecryptError } from "@common/error";
+import { isAllNetMaintenance } from "@common/maintenance";
 import { type Difficulty, Type } from "gcm-database/maimai";
 import type { Database } from "gcm-database-otogedb/maimai";
 import { BaseScoreAdapter, type DataOrError, FailedToFetchError } from "maidraw";
@@ -12,6 +13,7 @@ export class MaimaiDxNetAdapter extends BaseScoreAdapter implements MaimaiScoreA
     protected scraper = new MaimaiDxNetScraper();
 
     async getPlayerInfo(token: string) {
+        if (isAllNetMaintenance()) return { err: new AllNetMaintenanceError() };
         if (!Crypto.global) Crypto.global = await Crypto.new();
         const decrypted = await Crypto.global.decrypt(token);
         if (!decrypted) return { err: new FailedToDecryptError() };
@@ -53,6 +55,7 @@ export class MaimaiDxNetAdapter extends BaseScoreAdapter implements MaimaiScoreA
     }
 
     async getPlayerBest50(token: string): Promise<DataOrError<{ new: Score[]; old: Score[] }>> {
+        if (isAllNetMaintenance()) return { err: new AllNetMaintenanceError() };
         if (!Crypto.global) Crypto.global = await Crypto.new();
         const decrypted = await Crypto.global.decrypt(token);
         if (!decrypted) return { err: new FailedToDecryptError() };

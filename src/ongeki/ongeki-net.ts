@@ -1,5 +1,6 @@
 import { Crypto } from "@common/crypto";
-import { FailedToDecryptError } from "@common/error";
+import { AllNetMaintenanceError, FailedToDecryptError } from "@common/error";
+import { isAllNetMaintenance } from "@common/maintenance";
 import { type Chart, type Difficulty, LunaticType } from "gcm-database/ongeki";
 import type { Database } from "gcm-database-otogedb/ongeki";
 import { BaseScoreAdapter, type DataOrError, FailedToFetchError } from "maidraw";
@@ -12,6 +13,8 @@ export class OngekiNetAdapter extends BaseScoreAdapter implements OngekiScoreAda
     protected scraper = new OngekiNetScraper();
 
     async getPlayerInfo(token: string, _type: "refresh" | "classic") {
+        if (isAllNetMaintenance()) return { err: new AllNetMaintenanceError() };
+
         if (!Crypto.global) Crypto.global = await Crypto.new();
         const decrypted = await Crypto.global.decrypt(token);
         if (!decrypted) return { err: new FailedToDecryptError() };
@@ -48,6 +51,8 @@ export class OngekiNetAdapter extends BaseScoreAdapter implements OngekiScoreAda
     }
 
     async getPlayerBest60(token: string): Promise<DataOrError<{ new: Score[]; old: Score[]; plat: Score[]; best: Score[] }>> {
+        if (isAllNetMaintenance()) return { err: new AllNetMaintenanceError() };
+
         if (!Crypto.global) Crypto.global = await Crypto.new();
         const decrypted = await Crypto.global.decrypt(token);
         if (!decrypted) return { err: new FailedToDecryptError() };
@@ -76,6 +81,8 @@ export class OngekiNetAdapter extends BaseScoreAdapter implements OngekiScoreAda
     }
 
     async getPlayerBest55(token: string): Promise<DataOrError<{ recent: Score[]; new: Score[]; old: Score[]; best: Score[] }>> {
+        if (isAllNetMaintenance()) return { err: new AllNetMaintenanceError() };
+
         if (!Crypto.global) Crypto.global = await Crypto.new();
         const decrypted = await Crypto.global.decrypt(token);
         if (!decrypted) return { err: new FailedToDecryptError() };

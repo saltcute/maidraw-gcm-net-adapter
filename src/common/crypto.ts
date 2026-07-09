@@ -1,4 +1,4 @@
-import { existsSync, readFileSync, unlinkSync, writeFileSync, mkdirSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, unlinkSync, writeFileSync } from "node:fs";
 import os, { homedir } from "node:os";
 import { join } from "node:path";
 import openpgp from "openpgp";
