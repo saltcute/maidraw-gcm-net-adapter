@@ -6,6 +6,12 @@ export class BaseGcmError extends BaseError {
     }
 }
 
+export class UnknownError extends BaseGcmError {
+    constructor() {
+        super("unknown", "An unknown error has occurred.");
+    }
+}
+
 export class FailedToDecryptError extends BaseGcmError {
     constructor() {
         super("failed-to-decrypt", "Decryption failed");

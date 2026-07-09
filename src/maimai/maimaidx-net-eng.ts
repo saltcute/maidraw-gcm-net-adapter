@@ -1,9 +1,9 @@
 import type { Database } from "gcm-database-otogedb/maimai";
-import * as MaimaiDxNetEngScraper from "./lib/scraper/maimaidx-eng";
+import { MaimaiDxNetEngScraper } from "./lib/scraper/maimaidx-eng";
 import { MaimaiDxNetAdapter } from "./maimaidx-net";
 
 export class MaimaiDxNetEngAdapter extends MaimaiDxNetAdapter {
-    protected scraper = MaimaiDxNetEngScraper;
+    protected scraper = new MaimaiDxNetEngScraper();
 
     constructor({
         name = "maimaidx-net-eng-adapter",

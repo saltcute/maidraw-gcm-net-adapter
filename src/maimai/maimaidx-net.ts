@@ -1,15 +1,15 @@
 import { Crypto } from "@common/crypto";
-import { FailedToAuthenticateError, FailedToDecryptError } from "@common/error";
+import { FailedToDecryptError } from "@common/error";
 import { type Difficulty, Type } from "gcm-database/maimai";
 import type { Database } from "gcm-database-otogedb/maimai";
-import { BaseScoreAdapter, FailedToFetchError } from "maidraw";
+import { BaseScoreAdapter, type DataOrError, FailedToFetchError } from "maidraw";
 import { AchievementTypes, ComboLamp, type MaimaiScoreAdapter, type Score, SyncLamp } from "maidraw/maimai";
 import { MaimaiDXRate } from "rg-stats";
-import * as MaimaiDxNetScraper from "./lib/scraper/maimaidx";
+import { MaimaiDxNetScraper } from "./lib/scraper/maimaidx";
 import type { NetScore } from "./lib/scraper/types";
 
 export class MaimaiDxNetAdapter extends BaseScoreAdapter implements MaimaiScoreAdapter {
-    protected scraper = MaimaiDxNetScraper;
+    protected scraper = new MaimaiDxNetScraper();
 
     async getPlayerInfo(token: string) {
         if (!Crypto.global) Crypto.global = await Crypto.new();
@@ -19,17 +19,14 @@ export class MaimaiDxNetAdapter extends BaseScoreAdapter implements MaimaiScoreA
         const cached = await this.cache.get(`profile-${segaId}`);
         if (cached) return { data: cached };
         const cookies = await this.scraper.login(segaId, password);
-        if (!cookies)
-            return {
-                err: new FailedToAuthenticateError(),
-            };
-        const { data: b50, err } = await this.getPlayerBest50(token);
-        if (err) return { err };
-        const profile = await this.scraper.getProfile(cookies);
-        if (!profile) return { err: new FailedToFetchError("maidraw.adapter.gcm-net", "profile") };
+        if (cookies.err) return cookies;
+        const b50 = await this.getPlayerBest50(token);
+        if (b50.err) return b50;
+        const profile = await this.scraper.getProfile(cookies.data);
+        if (profile.err) return profile;
         const res = {
-            name: profile.name,
-            rating: b50.new.concat(b50.old).reduce((a, b) => a + Math.trunc(b.dxRating), 0),
+            name: profile.data.name,
+            rating: b50.data.new.concat(b50.data.old).reduce((a, b) => a + Math.trunc(b.dxRating), 0),
         };
         this.cache.put(`profile-${segaId}`, res, 5 * 60 * 1000);
         return { data: res };
@@ -55,16 +52,18 @@ export class MaimaiDxNetAdapter extends BaseScoreAdapter implements MaimaiScoreA
         this.database = database;
     }
 
-    async getPlayerBest50(token: string) {
+    async getPlayerBest50(token: string): Promise<DataOrError<{ new: Score[]; old: Score[] }>> {
         if (!Crypto.global) Crypto.global = await Crypto.new();
         const decrypted = await Crypto.global.decrypt(token);
         if (!decrypted) return { err: new FailedToDecryptError() };
         const { segaId, password } = decrypted;
+
         const cached = await this.cache.get(`best50-${segaId}`);
         if (cached) return { data: cached as { new: Score[]; old: Score[] } };
+
         const cookies = await this.scraper.login(segaId, password);
-        if (!cookies) return { err: new FailedToAuthenticateError() };
-        const rawBest50 = await this.scraper.getBest50(cookies, this.database);
+        if (cookies.err) return cookies;
+        const rawBest50 = await this.scraper.getBest50(cookies.data, this.database);
         const b50 = {
             new: rawBest50.new
                 .map((v) => this.toMaidrawScore(v))
