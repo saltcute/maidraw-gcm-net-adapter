@@ -5,6 +5,7 @@
     "main": "dist/index.js",
     "exports": {
         "./maimai": "./dist/maimai.js",
+        "./ongeki": "./dist/ongeki.js",
         "./common": "./dist/common.js"
     },
     "files": [
