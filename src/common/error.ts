@@ -12,8 +12,8 @@ export class AllNetMaintenanceError extends BaseGcmError {
     constructor() {
         super(
             "maintenance",
-            `ALL.Net services is currently under scheduled maintenance. You cannot use ALL.Net services including maimaiでらっくすNet, maimai DX NET, or オンゲキ-NET during the maintenance. 
-
+            `ALL.Net services are currently under scheduled maintenance. You cannot use ALL.Net services, including maimaiでらっくすNet, maimai DX NET, or オンゲキ-NET, during the maintenance. 
+        
 The maintenance period starts at 04:00 JST (${getRelativeTime(getCurrentMaintenanceStartTime())}) and ends at 07:00 JST (${getRelativeTime(getCurrentMaintenanceEndTime())}).`,
         );
     }
