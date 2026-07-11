@@ -8,13 +8,17 @@ export class BaseGcmError extends BaseError {
     }
 }
 
+const servicesMap = {
+    "default": "maimaiでらっくすNET, maimai DX NET, CHUNITHM-NET, or オンゲキ-NET",
+    "chunithm": "CHUNITHM-NET"
+}
 export class AllNetMaintenanceError extends BaseGcmError {
-    constructor() {
+    constructor(startHour: number = 4, service: "default" | "chunithm" = "default") {
         super(
             "maintenance",
-            `ALL.Net services are currently under scheduled maintenance. You cannot use ALL.Net services, including maimaiでらっくすNet, maimai DX NET, or オンゲキ-NET, during the maintenance. 
-        
-The maintenance period starts at 04:00 JST (${getRelativeTime(getCurrentMaintenanceStartTime())}) and ends at 07:00 JST (${getRelativeTime(getCurrentMaintenanceEndTime())}).`,
+            `The ALL.Net service is currently under scheduled maintenance. You cannot use ALL.Net services, including ${servicesMap[service]}, during the maintenance.
+
+The maintenance period starts at ${String(startHour).padStart(2, "0")}:00 JST (${getRelativeTime(getCurrentMaintenanceStartTime(startHour))}) and ends at 07:00 JST (${getRelativeTime(getCurrentMaintenanceEndTime())}).`,
         );
     }
 }

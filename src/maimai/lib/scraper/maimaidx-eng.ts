@@ -50,16 +50,13 @@ export class MaimaiDxNetEngScraper extends MaimaiDxNetScraper {
 
             const location = res.headers.get("location");
             const url = location ? new URL(location) : null;
-            if (url?.pathname.startsWith("/maimai-mobile")) {
+            if (url?.pathname.startsWith("/maimai-mobile/error")) {
+                return { err: await this.fetchErrorPageError(url, { ...loginCookies, ...this.getSetCookie(res) }) };
+            } else if (url?.pathname.startsWith("/maimai-mobile")) {
                 loginCookies = {
                     ...loginCookies,
                     ...this.getSetCookie(res),
                 };
-            } else if (url?.pathname.startsWith("/maimai-mobile/error")) {
-                const errorPageRes = await this.fetch(url);
-                if (!errorPageRes.ok) return { err: new UnknownError() };
-                const errorPage = await errorPageRes.text();
-                return { err: this.getErrorPageError(errorPage) };
             } else return { err: new UnknownError() };
 
             if (!location) return { err: new UnknownError() };
@@ -84,10 +81,7 @@ export class MaimaiDxNetEngScraper extends MaimaiDxNetScraper {
                 await this.cache.put(`cookielogin-${username}`, cookie, 15 * 60 * 1000);
                 return { data: cookie };
             } else if (url?.pathname.startsWith("/maimai-mobile/error")) {
-                const errorPageRes = await this.fetch(url);
-                if (!errorPageRes.ok) return { err: new UnknownError() };
-                const errorPage = await errorPageRes.text();
-                return { err: this.getErrorPageError(errorPage) };
+                return { err: await this.fetchErrorPageError(url, { ...loginCookies, ...this.getSetCookie(res) }) };
             } else return { err: new UnknownError() };
         }
     }

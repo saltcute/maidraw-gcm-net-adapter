@@ -76,6 +76,19 @@ export class MaimaiDxNetScraper {
 ${errorMsg}`,
         );
     }
+    // The error detail lives in the server-side session; fetched without the
+    // session cookies, the error page only shows a generic "please login again".
+    protected async fetchErrorPageError(url: URL, cookies: Record<string, string>) {
+        const errorPageRes = await this.fetch(url, {
+            headers: {
+                cookie: Object.entries(cookies)
+                    .map(([k, v]) => `${k}=${v}`)
+                    .join("; "),
+            },
+        });
+        if (!errorPageRes.ok) return new UnknownError();
+        return this.getErrorPageError(await errorPageRes.text());
+    }
 
     public async login(username: string, password: string): Promise<DataOrError<Cookie>> {
         const cached = await this.cache.get(`cookielogin-${username}`);
@@ -112,10 +125,7 @@ ${errorMsg}`,
                     ...this.getSetCookie(res),
                 };
             } else if (url?.pathname.startsWith("/maimai-mobile/error")) {
-                const errorPageRes = await this.fetch(url);
-                if (!errorPageRes.ok) return { err: new UnknownError() };
-                const errorPage = await errorPageRes.text();
-                return { err: this.getErrorPageError(errorPage) };
+                return { err: await this.fetchErrorPageError(url, { ...cookies, ...this.getSetCookie(res) }) };
             } else return { err: new UnknownError() };
         }
         {
@@ -137,10 +147,7 @@ ${errorMsg}`,
                     ...this.getSetCookie(res),
                 };
             } else if (url?.pathname.startsWith("/maimai-mobile/error")) {
-                const errorPageRes = await this.fetch(url);
-                if (!errorPageRes.ok) return { err: new UnknownError() };
-                const errorPage = await errorPageRes.text();
-                return { err: this.getErrorPageError(errorPage) };
+                return { err: await this.fetchErrorPageError(url, { ...cookies, ...this.getSetCookie(res) }) };
             } else return { err: new UnknownError() };
         }
         await this.cache.put(`cookielogin-${username}`, cookies, 15 * 60 * 1000);

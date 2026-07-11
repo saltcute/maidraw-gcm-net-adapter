@@ -5,7 +5,7 @@ const MAINTENANCE_START_HOUR = 4;
 const MAINTENANCE_END_HOUR = 7;
 
 function nextMaintenanceDate(): string {
-    const offset = currentJstHour() >= 7 ? 86400 : 0;
+    const offset = currentJstHour() >= MAINTENANCE_END_HOUR ? 86400 * 1000 : 0;
     return new Intl.DateTimeFormat("en-CA", {
         timeZone: TIME_ZONE,
         year: "numeric",
@@ -29,13 +29,17 @@ function getJstHour(hour: number): Date {
     return new Date(`${nextMaintenanceDate()}T${time}${JST_UTC_OFFSET}`);
 }
 
-export function isAllNetMaintenance(): boolean {
+/**
+ * @param startHour Maintenance start hour in JST. Defaults to the ALL.Net-wide
+ * 04:00; CHUNITHM-NET maintenance starts earlier at 02:00.
+ */
+export function isAllNetMaintenance(startHour: number = MAINTENANCE_START_HOUR): boolean {
     const hour = currentJstHour();
-    return hour >= MAINTENANCE_START_HOUR && hour < MAINTENANCE_END_HOUR;
+    return hour >= startHour && hour < MAINTENANCE_END_HOUR;
 }
 
-export function getCurrentMaintenanceStartTime(): Date {
-    return getJstHour(MAINTENANCE_START_HOUR);
+export function getCurrentMaintenanceStartTime(startHour: number = MAINTENANCE_START_HOUR): Date {
+    return getJstHour(startHour);
 }
 
 export function getCurrentMaintenanceEndTime(): Date {
