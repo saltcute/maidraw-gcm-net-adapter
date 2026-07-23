@@ -5,7 +5,7 @@ import { type Cookie, MaimaiDxNetScraper } from "./maimaidx";
 
 export class MaimaiDxNetEngScraper extends MaimaiDxNetScraper {
     protected readonly origin = "https://maimaidx-eng.com/";
-    protected readonly newScoreVersion = 25500;
+    protected readonly newScoreVersion = 26000;
 
     protected cache = new Cache("maidraw/adapter/maimaidx-net-eng-scraper");
     public async login(username: string, password: string): Promise<DataOrError<Cookie>> {
