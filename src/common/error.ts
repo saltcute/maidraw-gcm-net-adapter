@@ -9,9 +9,9 @@ export class BaseGcmError extends BaseError {
 }
 
 const servicesMap = {
-    "default": "maimaiでらっくすNET, maimai DX NET, CHUNITHM-NET, or オンゲキ-NET",
-    "chunithm": "CHUNITHM-NET"
-}
+    default: "maimaiでらっくすNET, maimai DX NET, CHUNITHM-NET, or オンゲキ-NET",
+    chunithm: "CHUNITHM-NET",
+};
 export class AllNetMaintenanceError extends BaseGcmError {
     constructor(startHour: number = 4, service: "default" | "chunithm" = "default") {
         super(

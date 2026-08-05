@@ -188,7 +188,7 @@ export class ChunithmNetAdapter extends BaseScoreAdapter implements ChunithmScor
     }
     private static fallbackChart(score: NetScore): Chart {
         return {
-            identifier: "0",
+            identifier: `unknown-chart-${score.name}`,
             title: score.name,
             artist: "",
             difficulty: score.difficulty as Difficulty,

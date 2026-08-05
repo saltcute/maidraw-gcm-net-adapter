@@ -112,7 +112,7 @@ export class MaimaiDxNetAdapter extends BaseScoreAdapter implements MaimaiScoreA
             chart: score.dbChart
                 ? score.dbChart
                 : {
-                      identifier: "0",
+                      identifier: `unknown-chart-${score.name}`,
                       title: score.name,
                       difficulty: (() => {
                           return score.difficulty as Difficulty;
