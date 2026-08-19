@@ -122,7 +122,7 @@ ${errorMsg}`,
                     ...cookies,
                     ...this.getSetCookie(res),
                 };
-            } else if (url?.pathname.includes("/error")) {
+            } else if (url?.pathname.includes("/nError")) {
                 return { err: await this.fetchErrorPageError(url, { ...cookies, ...this.getSetCookie(res) }) };
             } else
                 return {
@@ -152,7 +152,7 @@ ${errorMsg}`,
                     ...cookies,
                     ...this.getSetCookie(res),
                 };
-            } else if (url?.pathname.includes("/error")) {
+            } else if (url?.pathname.includes("/nError")) {
                 return { err: await this.fetchErrorPageError(url, { ...cookies, ...this.getSetCookie(res) }) };
             } else
                 return {

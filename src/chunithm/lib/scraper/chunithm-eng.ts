@@ -52,7 +52,7 @@ export class ChunithmNetEngScraper extends ChunithmNetScraper {
 
             const location = res.headers.get("location");
             const url = location ? new URL(location) : null;
-            if (url?.pathname.includes("/error")) {
+            if (url?.pathname.includes("/nError")) {
                 return { err: await this.fetchErrorPageError(url, cookies) };
             } else if (url?.pathname.startsWith("/mobile")) {
                 gatewayCookies = {
@@ -82,7 +82,7 @@ export class ChunithmNetEngScraper extends ChunithmNetScraper {
                 };
                 await this.cache.put(`cookielogin-${username}`, cookies, 15 * 60 * 1000);
                 return { data: cookies };
-            } else if (url?.pathname.includes("/error")) {
+            } else if (url?.pathname.includes("/nError")) {
                 return { err: await this.fetchErrorPageError(url, { ...cookies, ...this.getSetCookie(res) }) };
             } else
                 return {
