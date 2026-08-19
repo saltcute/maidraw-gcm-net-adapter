@@ -59,7 +59,7 @@ export class ChunithmNetEngScraper extends ChunithmNetScraper {
                     ...gatewayCookies,
                     ...this.getSetCookie(res),
                 };
-            } else return { err: new UnknownError(`unexpected url location${url && ` \`${url?.toString()}\``} at login.`) };
+            } else return { err: new UnknownError(`unexpected url location${url && ` \`[${url?.toString()}](${url?.toString()})\``} at login.`) };
 
             if (!location) return { err: new UnknownError(`#CLSC64`) };
             getTokenLocation = location;
@@ -84,7 +84,10 @@ export class ChunithmNetEngScraper extends ChunithmNetScraper {
                 return { data: cookies };
             } else if (url?.pathname.includes("/error")) {
                 return { err: await this.fetchErrorPageError(url, { ...cookies, ...this.getSetCookie(res) }) };
-            } else return { err: new UnknownError(`unexpected url location${url && ` \`${url?.toString()}\``} at verifing token.`) };
+            } else
+                return {
+                    err: new UnknownError(`unexpected url location${url && ` \`[${url?.toString()}](${url?.toString()})\``} at verifing token.`),
+                };
         }
     }
 }
