@@ -30,7 +30,7 @@ export class ChunithmNetEngScraper extends ChunithmNetScraper {
                     referer: undefined,
                 },
             });
-            if (!(res.status >= 200 && res.status < 300)) return { err: new UnknownError() };
+            if (!(res.status >= 200 && res.status < 300)) return { err: new UnknownError("unexpected redirection status at login.") };
 
             gatewayCookies = this.getSetCookie(res);
         }
@@ -59,9 +59,9 @@ export class ChunithmNetEngScraper extends ChunithmNetScraper {
                     ...gatewayCookies,
                     ...this.getSetCookie(res),
                 };
-            } else return { err: new UnknownError() };
+            } else return { err: new UnknownError(`unexpected url location${url && ` \`${url?.toString()}\``} at login.`) };
 
-            if (!location) return { err: new UnknownError() };
+            if (!location) return { err: new UnknownError(`#CLSC64`) };
             getTokenLocation = location;
         }
         {
@@ -84,7 +84,7 @@ export class ChunithmNetEngScraper extends ChunithmNetScraper {
                 return { data: cookies };
             } else if (url?.pathname.includes("/error")) {
                 return { err: await this.fetchErrorPageError(url, { ...cookies, ...this.getSetCookie(res) }) };
-            } else return { err: new UnknownError() };
+            } else return { err: new UnknownError(`unexpected url location${url && ` \`${url?.toString()}\``} at verifing token.`) };
         }
     }
 }

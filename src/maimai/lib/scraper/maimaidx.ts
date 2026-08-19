@@ -86,7 +86,7 @@ ${errorMsg}`,
                     .join("; "),
             },
         });
-        if (!errorPageRes.ok) return new UnknownError();
+        if (!errorPageRes.ok) return new UnknownError(`cannot fetch error page.`);
         return this.getErrorPageError(await errorPageRes.text());
     }
 
@@ -126,7 +126,7 @@ ${errorMsg}`,
                 };
             } else if (url?.pathname.startsWith("/maimai-mobile/error")) {
                 return { err: await this.fetchErrorPageError(url, { ...cookies, ...this.getSetCookie(res) }) };
-            } else return { err: new UnknownError() };
+            } else return { err: new UnknownError(`unexpected url location${url && ` \`${url?.toString()}\``} at submiting credentials.`) };
         }
         {
             const res = await this.fetch("https://maimaidx.jp/maimai-mobile/aimeList/submit/?idx=0", {
@@ -148,7 +148,7 @@ ${errorMsg}`,
                 };
             } else if (url?.pathname.startsWith("/maimai-mobile/error")) {
                 return { err: await this.fetchErrorPageError(url, { ...cookies, ...this.getSetCookie(res) }) };
-            } else return { err: new UnknownError() };
+            } else return { err: new UnknownError(`unexpected url location${url && ` \`${url?.toString()}\``} at selecting Aime.`) };
         }
         await this.cache.put(`cookielogin-${username}`, cookies, 15 * 60 * 1000);
         return { data: cookies };

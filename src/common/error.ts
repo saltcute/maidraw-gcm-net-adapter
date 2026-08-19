@@ -24,8 +24,8 @@ The maintenance period starts at ${String(startHour).padStart(2, "0")}:00 JST ($
 }
 
 export class UnknownError extends BaseGcmError {
-    constructor() {
-        super("unknown", "An unknown error has occurred.");
+    constructor(detail?: string) {
+        super("unknown", `An unknown error has occurred.${detail && ` More info: ${detail}`}`);
     }
 }
 

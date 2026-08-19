@@ -25,7 +25,7 @@ export class MaimaiDxNetEngScraper extends MaimaiDxNetScraper {
                     },
                 },
             );
-            if (!(res.status >= 200 && res.status < 300)) return { err: new UnknownError() };
+            if (!(res.status >= 200 && res.status < 300)) return { err: new UnknownError("unexpected redirection status at login.") };
 
             loginCookies = this.getSetCookie(res);
         }
@@ -57,9 +57,9 @@ export class MaimaiDxNetEngScraper extends MaimaiDxNetScraper {
                     ...loginCookies,
                     ...this.getSetCookie(res),
                 };
-            } else return { err: new UnknownError() };
+            } else return { err: new UnknownError(`unexpected url location${url && ` \`${url?.toString()}\``} at login.`) };
 
-            if (!location) return { err: new UnknownError() };
+            if (!location) return { err: new UnknownError("#MLSM62") };
             getTokenLocation = location;
         }
         {
@@ -82,7 +82,7 @@ export class MaimaiDxNetEngScraper extends MaimaiDxNetScraper {
                 return { data: cookie };
             } else if (url?.pathname.startsWith("/maimai-mobile/error")) {
                 return { err: await this.fetchErrorPageError(url, { ...loginCookies, ...this.getSetCookie(res) }) };
-            } else return { err: new UnknownError() };
+            } else return { err: new UnknownError(`unexpected url location${url && ` \`${url?.toString()}\``} at verifing token.`) };
         }
     }
 }
