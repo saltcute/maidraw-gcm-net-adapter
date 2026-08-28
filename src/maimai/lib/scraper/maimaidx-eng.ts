@@ -57,7 +57,7 @@ export class MaimaiDxNetEngScraper extends MaimaiDxNetScraper {
                     ...loginCookies,
                     ...this.getSetCookie(res),
                 };
-            } else return { err: new UnknownError(`unexpected url location${url && ` \`[${url?.toString()}](${url?.toString()})\``} at login.`) };
+            } else return { err: new UnknownError(`unexpected url location${url && ` [${url?.toString()}](${url?.toString()})`} at login.`) };
 
             if (!location) return { err: new UnknownError("#MLSM62") };
             getTokenLocation = location;
@@ -84,7 +84,7 @@ export class MaimaiDxNetEngScraper extends MaimaiDxNetScraper {
                 return { err: await this.fetchErrorPageError(url, { ...loginCookies, ...this.getSetCookie(res) }) };
             } else
                 return {
-                    err: new UnknownError(`unexpected url location${url && ` \`[${url?.toString()}](${url?.toString()})\``} at verifing token.`),
+                    err: new UnknownError(`unexpected url location${url && ` [${url?.toString()}](${url?.toString()})`} at verifing token.`),
                 };
         }
     }

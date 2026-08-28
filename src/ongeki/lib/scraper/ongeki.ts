@@ -120,9 +120,7 @@ ${errorMsg}`,
                 return { err: await this.fetchErrorPageError(url, { ...cookies, ...this.getSetCookie(res) }) };
             } else
                 return {
-                    err: new UnknownError(
-                        `unexpected url location${url && ` \`[${url?.toString()}](${url?.toString()})\``} at submiting credentials.`,
-                    ),
+                    err: new UnknownError(`unexpected url location${url && ` [${url?.toString()}](${url?.toString()})`} at submiting credentials.`),
                 };
         }
         {
@@ -147,7 +145,7 @@ ${errorMsg}`,
                 return { err: await this.fetchErrorPageError(url, { ...cookies, ...this.getSetCookie(res) }) };
             } else
                 return {
-                    err: new UnknownError(`unexpected url location${url && ` \`[${url?.toString()}](${url?.toString()})\``} at selecting Aime.`),
+                    err: new UnknownError(`unexpected url location${url && ` [${url?.toString()}](${url?.toString()})`} at selecting Aime.`),
                 };
         }
         await this.cache.put(`cookielogin-${username}`, cookies, 15 * 60 * 1000);
