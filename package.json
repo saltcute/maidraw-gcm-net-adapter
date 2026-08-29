@@ -38,13 +38,12 @@
         "cheerio": "^1.1.2",
         "gcm-database": "^1.0.3",
         "gcm-database-otogedb": "^1.1.2",
-        "lodash": "^4.17.21",
         "openpgp": "^6.2.2",
         "rg-stats": "^1.2.1",
         "string-similarity": "^4.0.4"
     },
     "peerDependencies": {
-        "maidraw": "^0.13.5"
+        "maidraw": "^0.13.9"
     },
     "devDependencies": {
         "@biomejs/biome": "2.5.0",
