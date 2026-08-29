@@ -244,8 +244,9 @@ ${errorMsg}`,
         "bright MEMORY Act.2": 140,
         "bright MEMORY Act.3": 145,
         "Re:Fresh": 150,
+        "Re:Fresh Act.2": 160,
     };
-    protected readonly newScoreVersion: number = 150;
+    protected readonly newScoreVersion: number = 160;
     private isNewVersion(score: NetScore) {
         if (!score.dbChart) return true;
         const version = this.versionMap[score.dbChart.optionalData.gameVersion];
