@@ -1,5 +1,6 @@
-import { UnknownError } from "@common/error";
+import { BaseGcmError, UnknownError } from "@common/error";
 import { Cache } from "@saltcute/cache";
+import * as Cheerio from "cheerio";
 import type { DataOrError } from "maidraw";
 import { fetch } from "undici";
 import { ChunithmNetScraper, type Cookie } from "./chunithm";
@@ -59,6 +60,22 @@ export class ChunithmNetEngScraper extends ChunithmNetScraper {
                     ...gatewayCookies,
                     ...this.getSetCookie(res),
                 };
+            } else if (url?.pathname.includes("/common_auth/login")) {
+                const intlErrorPage = await this.fetch(url, {
+                    headers: {
+                        referer: "https://lng-tgk-aime-gw.am-all.net/",
+                        cookie: Object.entries({
+                            ...gatewayCookies,
+                            ...this.getSetCookie(res),
+                        })
+                            .map(([k, v]) => `${k}=${v}`)
+                            .join("; "),
+                    },
+                });
+                const $ = Cheerio.load(await intlErrorPage.text());
+                const errorText = $("#error-ui").text();
+                if (!errorText) throw "";
+                return { err: new BaseGcmError("aime-auth-error", `failed to login. ${errorText}`) };
             } else return { err: new UnknownError(`unexpected url location${url && ` [${url?.toString()}](${url?.toString()})`} at login.`) };
 
             if (!location) return { err: new UnknownError(`#CLSC64`) };

@@ -1,5 +1,6 @@
-import { UnknownError } from "@common/error";
+import { BaseGcmError, UnknownError } from "@common/error";
 import { Cache } from "@saltcute/cache";
+import * as Cheerio from "cheerio";
 import type { DataOrError } from "maidraw";
 import { type Cookie, MaimaiDxNetScraper } from "./maimaidx";
 
@@ -57,6 +58,26 @@ export class MaimaiDxNetEngScraper extends MaimaiDxNetScraper {
                     ...loginCookies,
                     ...this.getSetCookie(res),
                 };
+            } else if (url?.pathname.includes("/common_auth/login")) {
+                try {
+                    const intlErrorPage = await this.fetch(url, {
+                        headers: {
+                            referer: "https://lng-tgk-aime-gw.am-all.net/",
+                            cookie: Object.entries({
+                                ...loginCookies,
+                                ...this.getSetCookie(res),
+                            })
+                                .map(([k, v]) => `${k}=${v}`)
+                                .join("; "),
+                        },
+                    });
+                    const $ = Cheerio.load(await intlErrorPage.text());
+                    const errorText = $("#error-ui").text();
+                    if (!errorText) throw "";
+                    return { err: new BaseGcmError("aime-auth-error", `failed to login. ${errorText}`) };
+                } catch {
+                    return { err: new UnknownError(`unexpected login status. Did you enter your Sega ID and password correctly?`) };
+                }
             } else return { err: new UnknownError(`unexpected url location${url && ` [${url?.toString()}](${url?.toString()})`} at login.`) };
 
             if (!location) return { err: new UnknownError("#MLSM62") };
