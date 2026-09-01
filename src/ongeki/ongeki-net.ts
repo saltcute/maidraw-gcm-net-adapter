@@ -11,10 +11,14 @@ import type { NetScore, RecentScore } from "./lib/scraper/types";
 
 export class OngekiNetAdapter extends BaseScoreAdapter implements OngekiScoreAdapter {
     protected scraper = new OngekiNetScraper();
+    protected readonly maintenanceStartHour: number = 4;
+    protected readonly maintenanceEndHour: number = 7;
+    protected get allNetMaintenanceError() {
+        return new AllNetMaintenanceError();
+    }
 
     async getPlayerInfo(token: string, _type: "refresh" | "classic") {
-        if (isAllNetMaintenance()) return { err: new AllNetMaintenanceError() };
-
+        if (isAllNetMaintenance(this.maintenanceStartHour, this.maintenanceEndHour)) return { err: this.allNetMaintenanceError };
         if (!Crypto.global) Crypto.global = await Crypto.new();
         const decrypted = await Crypto.global.decrypt(token);
         if (!decrypted) return { err: new FailedToDecryptError() };
@@ -51,8 +55,7 @@ export class OngekiNetAdapter extends BaseScoreAdapter implements OngekiScoreAda
     }
 
     async getPlayerBest60(token: string): Promise<DataOrError<{ new: Score[]; old: Score[]; plat: Score[]; best: Score[] }>> {
-        if (isAllNetMaintenance()) return { err: new AllNetMaintenanceError() };
-
+        if (isAllNetMaintenance(this.maintenanceStartHour, this.maintenanceEndHour)) return { err: this.allNetMaintenanceError };
         if (!Crypto.global) Crypto.global = await Crypto.new();
         const decrypted = await Crypto.global.decrypt(token);
         if (!decrypted) return { err: new FailedToDecryptError() };
@@ -81,8 +84,7 @@ export class OngekiNetAdapter extends BaseScoreAdapter implements OngekiScoreAda
     }
 
     async getPlayerBest55(token: string): Promise<DataOrError<{ recent: Score[]; new: Score[]; old: Score[]; best: Score[] }>> {
-        if (isAllNetMaintenance()) return { err: new AllNetMaintenanceError() };
-
+        if (isAllNetMaintenance(this.maintenanceStartHour, this.maintenanceEndHour)) return { err: this.allNetMaintenanceError };
         if (!Crypto.global) Crypto.global = await Crypto.new();
         const decrypted = await Crypto.global.decrypt(token);
         if (!decrypted) return { err: new FailedToDecryptError() };

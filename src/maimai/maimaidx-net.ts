@@ -11,9 +11,18 @@ import type { NetScore } from "./lib/scraper/types";
 
 export class MaimaiDxNetAdapter extends BaseScoreAdapter implements MaimaiScoreAdapter {
     protected scraper = new MaimaiDxNetScraper();
+    protected get maintenanceStartHour() {
+        return 4;
+    }
+    protected get maintenanceEndHour() {
+        return 7;
+    }
+    protected get allNetMaintenanceError() {
+        return new AllNetMaintenanceError(this.maintenanceStartHour, this.maintenanceEndHour, "default");
+    }
 
     async getPlayerInfo(token: string) {
-        if (isAllNetMaintenance()) return { err: new AllNetMaintenanceError() };
+        if (isAllNetMaintenance(this.maintenanceStartHour, this.maintenanceEndHour)) return { err: this.allNetMaintenanceError };
         if (!Crypto.global) Crypto.global = await Crypto.new();
         const decrypted = await Crypto.global.decrypt(token);
         if (!decrypted) return { err: new FailedToDecryptError() };
@@ -55,7 +64,7 @@ export class MaimaiDxNetAdapter extends BaseScoreAdapter implements MaimaiScoreA
     }
 
     async getPlayerBest50(token: string): Promise<DataOrError<{ new: Score[]; old: Score[] }>> {
-        if (isAllNetMaintenance()) return { err: new AllNetMaintenanceError() };
+        if (isAllNetMaintenance(this.maintenanceStartHour, this.maintenanceEndHour)) return { err: this.allNetMaintenanceError };
         if (!Crypto.global) Crypto.global = await Crypto.new();
         const decrypted = await Crypto.global.decrypt(token);
         if (!decrypted) return { err: new FailedToDecryptError() };

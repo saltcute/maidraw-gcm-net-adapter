@@ -11,11 +11,14 @@ import type { NetScore } from "./lib/scraper/types";
 
 export class ChunithmNetAdapter extends BaseScoreAdapter implements ChunithmScoreAdapter {
     protected scraper = new ChunithmNetScraper();
-    // CHUNITHM-NET maintenance starts at 02:00 JST, earlier than the 04:00 of other ALL.Net services.
     protected readonly maintenanceStartHour: number = 2;
+    protected readonly maintenanceEndHour: number = 7;
+    protected get allNetMaintenanceError() {
+        return new AllNetMaintenanceError(this.maintenanceStartHour, this.maintenanceEndHour, "chunithm");
+    }
 
     async getPlayerInfo(token: string, _type: "new" | "recents") {
-        if (isAllNetMaintenance(this.maintenanceStartHour)) return { err: new AllNetMaintenanceError(this.maintenanceStartHour, "chunithm") };
+        if (isAllNetMaintenance(this.maintenanceStartHour, this.maintenanceEndHour)) return { err: this.allNetMaintenanceError };
         if (!Crypto.global) Crypto.global = await Crypto.new();
         const decrypted = await Crypto.global.decrypt(token);
         if (!decrypted) return { err: new FailedToDecryptError() };
@@ -52,7 +55,7 @@ export class ChunithmNetAdapter extends BaseScoreAdapter implements ChunithmScor
     }
 
     async getPlayerBest50(token: string): Promise<DataOrError<{ new: Score[]; old: Score[]; best?: Score[] }>> {
-        if (isAllNetMaintenance(this.maintenanceStartHour)) return { err: new AllNetMaintenanceError(this.maintenanceStartHour, "chunithm") };
+        if (isAllNetMaintenance(this.maintenanceStartHour, this.maintenanceEndHour)) return { err: this.allNetMaintenanceError };
         if (!Crypto.global) Crypto.global = await Crypto.new();
         const decrypted = await Crypto.global.decrypt(token);
         if (!decrypted) return { err: new FailedToDecryptError() };
@@ -79,7 +82,7 @@ export class ChunithmNetAdapter extends BaseScoreAdapter implements ChunithmScor
     }
 
     async getPlayerRecent40(token: string): Promise<DataOrError<{ recent: Score[]; best: Score[] }>> {
-        if (isAllNetMaintenance(this.maintenanceStartHour)) return { err: new AllNetMaintenanceError(this.maintenanceStartHour, "chunithm") };
+        if (isAllNetMaintenance(this.maintenanceStartHour, this.maintenanceEndHour)) return { err: this.allNetMaintenanceError };
         if (!Crypto.global) Crypto.global = await Crypto.new();
         const decrypted = await Crypto.global.decrypt(token);
         if (!decrypted) return { err: new FailedToDecryptError() };

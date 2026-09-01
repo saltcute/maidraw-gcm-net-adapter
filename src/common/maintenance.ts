@@ -4,8 +4,8 @@ const JST_UTC_OFFSET = "+09:00";
 const MAINTENANCE_START_HOUR = 4;
 const MAINTENANCE_END_HOUR = 7;
 
-function nextMaintenanceDate(): string {
-    const offset = currentJstHour() >= MAINTENANCE_END_HOUR ? 86400 * 1000 : 0;
+function nextMaintenanceDate(endHour: number): string {
+    const offset = currentJstHour() >= endHour ? 86400 * 1000 : 0;
     return new Intl.DateTimeFormat("en-CA", {
         timeZone: TIME_ZONE,
         year: "numeric",
@@ -23,25 +23,31 @@ function currentJstHour(): number {
         }).format(new Date()),
     );
 }
+export function currentJstDayOfWeek() {
+    return new Intl.DateTimeFormat("en-US", {
+        timeZone: TIME_ZONE,
+        weekday: "long",
+    }).format(new Date());
+}
 
-function getJstHour(hour: number): Date {
+function getJstHour(hour: number, endHour: number): Date {
     const time = `${String(hour).padStart(2, "0")}:00:00`;
-    return new Date(`${nextMaintenanceDate()}T${time}${JST_UTC_OFFSET}`);
+    return new Date(`${nextMaintenanceDate(endHour)}T${time}${JST_UTC_OFFSET}`);
 }
 
 /**
  * @param startHour Maintenance start hour in JST. Defaults to the ALL.Net-wide
  * 04:00; CHUNITHM-NET maintenance starts earlier at 02:00.
  */
-export function isAllNetMaintenance(startHour: number = MAINTENANCE_START_HOUR): boolean {
+export function isAllNetMaintenance(startHour: number = MAINTENANCE_START_HOUR, endHour: number = MAINTENANCE_END_HOUR): boolean {
     const hour = currentJstHour();
-    return hour >= startHour && hour < MAINTENANCE_END_HOUR;
+    return hour >= startHour && hour < endHour;
 }
 
-export function getCurrentMaintenanceStartTime(startHour: number = MAINTENANCE_START_HOUR): Date {
-    return getJstHour(startHour);
+export function getCurrentMaintenanceStartTime(startHour: number = MAINTENANCE_START_HOUR, endHour: number = MAINTENANCE_END_HOUR): Date {
+    return getJstHour(startHour, endHour);
 }
 
-export function getCurrentMaintenanceEndTime(): Date {
-    return getJstHour(MAINTENANCE_END_HOUR);
+export function getCurrentMaintenanceEndTime(endHour: number = MAINTENANCE_END_HOUR): Date {
+    return getJstHour(endHour, endHour);
 }
