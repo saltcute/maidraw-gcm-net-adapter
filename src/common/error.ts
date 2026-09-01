@@ -8,19 +8,30 @@ export class BaseGcmError extends BaseError {
     }
 }
 
-const servicesMap = {
-    default: "maimaiでらっくすNET, CHUNITHM-NET, or オンゲキ-NET",
-    "maimaidx-eng": "maimai DX NET",
-    chunithm: "CHUNITHM-NET",
-};
 export class AllNetMaintenanceError extends BaseGcmError {
-    constructor(startHour: number = 4, endHour: number = 7, service: "default" | "maimaidx-eng" | "chunithm" = "default") {
+    private static readonly servicesMap = {
+        default: "maimaiでらっくすNET, CHUNITHM-NET, or オンゲキ-NET",
+        "maimaidx-eng": "maimai DX NET",
+        chunithm: "CHUNITHM-NET",
+    };
+    constructor(
+        private startHour: number = 4,
+        private endHour: number = 7,
+        private service: "default" | "maimaidx-eng" | "chunithm" = "default",
+    ) {
         super(
             "maintenance",
-            `The ALL.Net service is currently under scheduled maintenance. You cannot use ALL.Net services, including ${servicesMap[service]}, during the maintenance.
+            `The ALL.Net service is currently under scheduled maintenance. You cannot use ALL.Net services, including ${AllNetMaintenanceError.servicesMap[service]}, during the maintenance.
 
-The maintenance period starts at ${String(startHour).padStart(2, "0")}:00 JST (${getRelativeTime(getCurrentMaintenanceStartTime(startHour))}) and ends at ${String(endHour).padStart(2, "0")}:00 JST (${getRelativeTime(getCurrentMaintenanceEndTime())}).`,
+The maintenance period started at ${String(startHour).padStart(2, "0")}:00 JST (${getRelativeTime(getCurrentMaintenanceStartTime(startHour))}) and will end at ${String(endHour).padStart(2, "0")}:00 JST (${getRelativeTime(getCurrentMaintenanceEndTime(endHour))}).`,
         );
+    }
+    public getDiscordMarkdownContent() {
+        const startTimestamp = Math.floor(getCurrentMaintenanceStartTime(this.startHour).getTime() / 1000);
+        const endTimestamp = Math.floor(getCurrentMaintenanceEndTime(this.endHour).getTime() / 1000);
+        return `The ALL.Net service is currently under scheduled maintenance. You cannot use ALL.Net services, including ${AllNetMaintenanceError.servicesMap[this.service]}, during the maintenance. 
+
+The maintenance period started at <t:${startTimestamp}:t> (<t:${startTimestamp}:R>), and will end at <t:${endTimestamp}:t> (<t:${endTimestamp}:R>).`;
     }
 }
 

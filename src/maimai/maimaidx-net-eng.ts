@@ -6,14 +6,15 @@ import { MaimaiDxNetAdapter } from "./maimaidx-net";
 
 export class MaimaiDxNetEngAdapter extends MaimaiDxNetAdapter {
     protected scraper = new MaimaiDxNetEngScraper();
-    protected get maintenanceStartHour() {
+
+    public get maintenanceStartHour() {
         return 1;
     }
-    protected get maintenanceEndHour() {
+    public get maintenanceEndHour() {
         if (currentJstDayOfWeek() === "Wednesday") return 4;
         return 2;
     }
-    protected get allNetMaintenanceError() {
+    public get allNetMaintenanceError() {
         return new AllNetMaintenanceError(this.maintenanceStartHour, this.maintenanceEndHour, "maimaidx-eng");
     }
 

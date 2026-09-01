@@ -11,9 +11,10 @@ import type { NetScore } from "./lib/scraper/types";
 
 export class ChunithmNetAdapter extends BaseScoreAdapter implements ChunithmScoreAdapter {
     protected scraper = new ChunithmNetScraper();
-    protected readonly maintenanceStartHour: number = 2;
-    protected readonly maintenanceEndHour: number = 7;
-    protected get allNetMaintenanceError() {
+
+    public readonly maintenanceStartHour: number = 2;
+    public readonly maintenanceEndHour: number = 7;
+    public get allNetMaintenanceError() {
         return new AllNetMaintenanceError(this.maintenanceStartHour, this.maintenanceEndHour, "chunithm");
     }
 

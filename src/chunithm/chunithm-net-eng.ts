@@ -5,9 +5,10 @@ import { ChunithmNetEngScraper } from "./lib/scraper/chunithm-eng";
 
 export class ChunithmNetEngAdapter extends ChunithmNetAdapter {
     protected scraper = new ChunithmNetEngScraper();
-    protected readonly maintenanceStartHour: number = 4;
-    protected readonly maintenanceEndHour: number = 7;
-    protected get allNetMaintenanceError() {
+
+    public readonly maintenanceStartHour: number = 4;
+    public readonly maintenanceEndHour: number = 7;
+    public get allNetMaintenanceError() {
         return new AllNetMaintenanceError(this.maintenanceStartHour, this.maintenanceEndHour, "default");
     }
 

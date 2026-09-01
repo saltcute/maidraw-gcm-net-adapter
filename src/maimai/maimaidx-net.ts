@@ -11,13 +11,14 @@ import type { NetScore } from "./lib/scraper/types";
 
 export class MaimaiDxNetAdapter extends BaseScoreAdapter implements MaimaiScoreAdapter {
     protected scraper = new MaimaiDxNetScraper();
-    protected get maintenanceStartHour() {
+
+    public get maintenanceStartHour() {
         return 4;
     }
-    protected get maintenanceEndHour() {
+    public get maintenanceEndHour() {
         return 7;
     }
-    protected get allNetMaintenanceError() {
+    public get allNetMaintenanceError() {
         return new AllNetMaintenanceError(this.maintenanceStartHour, this.maintenanceEndHour, "default");
     }
 

@@ -11,9 +11,10 @@ import type { NetScore, RecentScore } from "./lib/scraper/types";
 
 export class OngekiNetAdapter extends BaseScoreAdapter implements OngekiScoreAdapter {
     protected scraper = new OngekiNetScraper();
-    protected readonly maintenanceStartHour: number = 4;
-    protected readonly maintenanceEndHour: number = 7;
-    protected get allNetMaintenanceError() {
+
+    public readonly maintenanceStartHour: number = 4;
+    public readonly maintenanceEndHour: number = 7;
+    public get allNetMaintenanceError() {
         return new AllNetMaintenanceError();
     }
 
