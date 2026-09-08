@@ -1,4 +1,4 @@
-import { AllNetMaintenanceError } from "@common/error";
+import { ALL_NET_MAINTENANCE, type MaintenanceSchedule } from "@common/maintenance";
 import type { Database } from "gcm-database-otogedb/chunithm";
 import { ChunithmNetAdapter } from "./chunithm-net";
 import { ChunithmNetEngScraper } from "./lib/scraper/chunithm-eng";
@@ -6,11 +6,8 @@ import { ChunithmNetEngScraper } from "./lib/scraper/chunithm-eng";
 export class ChunithmNetEngAdapter extends ChunithmNetAdapter {
     protected scraper = new ChunithmNetEngScraper();
 
-    public readonly maintenanceStartHour: number = 4;
-    public readonly maintenanceEndHour: number = 7;
-    public get allNetMaintenanceError() {
-        return new AllNetMaintenanceError(this.maintenanceStartHour, this.maintenanceEndHour, "default");
-    }
+    public readonly maintenanceSchedule: MaintenanceSchedule = ALL_NET_MAINTENANCE;
+    protected readonly maintenanceService: "default" | "maimaidx-eng" | "chunithm" = "default";
 
     constructor({
         name = "chunithm-net-eng-adapter",

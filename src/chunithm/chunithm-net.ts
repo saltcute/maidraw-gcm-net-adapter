@@ -1,6 +1,6 @@
 import { Crypto } from "@common/crypto";
 import { AllNetMaintenanceError, FailedToDecryptError } from "@common/error";
-import { isAllNetMaintenance } from "@common/maintenance";
+import { CHUNITHM_MAINTENANCE, type MaintenanceSchedule } from "@common/maintenance";
 import type { Chart, Difficulty } from "gcm-database/chunithm";
 import type { Database } from "gcm-database-otogedb/chunithm";
 import { BaseScoreAdapter, type DataOrError, FailedToFetchError } from "maidraw";
@@ -12,14 +12,15 @@ import type { NetScore } from "./lib/scraper/types";
 export class ChunithmNetAdapter extends BaseScoreAdapter implements ChunithmScoreAdapter {
     protected scraper = new ChunithmNetScraper();
 
-    public readonly maintenanceStartHour: number = 2;
-    public readonly maintenanceEndHour: number = 7;
+    public readonly maintenanceSchedule: MaintenanceSchedule = CHUNITHM_MAINTENANCE;
+    protected readonly maintenanceService: "default" | "maimaidx-eng" | "chunithm" = "chunithm";
     public get allNetMaintenanceError() {
-        return new AllNetMaintenanceError(this.maintenanceStartHour, this.maintenanceEndHour, "chunithm");
+        return new AllNetMaintenanceError(this.maintenanceSchedule.getCurrentOrNextWindow(), this.maintenanceService);
     }
 
     async getPlayerInfo(token: string, _type: "new" | "recents") {
-        if (isAllNetMaintenance(this.maintenanceStartHour, this.maintenanceEndHour)) return { err: this.allNetMaintenanceError };
+        const maintenance = this.maintenanceSchedule.getCurrentWindow();
+        if (maintenance) return { err: new AllNetMaintenanceError(maintenance, this.maintenanceService) };
         if (!Crypto.global) Crypto.global = await Crypto.new();
         const decrypted = await Crypto.global.decrypt(token);
         if (!decrypted) return { err: new FailedToDecryptError() };
@@ -56,7 +57,8 @@ export class ChunithmNetAdapter extends BaseScoreAdapter implements ChunithmScor
     }
 
     async getPlayerBest50(token: string): Promise<DataOrError<{ new: Score[]; old: Score[]; best?: Score[] }>> {
-        if (isAllNetMaintenance(this.maintenanceStartHour, this.maintenanceEndHour)) return { err: this.allNetMaintenanceError };
+        const maintenance = this.maintenanceSchedule.getCurrentWindow();
+        if (maintenance) return { err: new AllNetMaintenanceError(maintenance, this.maintenanceService) };
         if (!Crypto.global) Crypto.global = await Crypto.new();
         const decrypted = await Crypto.global.decrypt(token);
         if (!decrypted) return { err: new FailedToDecryptError() };
@@ -83,7 +85,8 @@ export class ChunithmNetAdapter extends BaseScoreAdapter implements ChunithmScor
     }
 
     async getPlayerRecent40(token: string): Promise<DataOrError<{ recent: Score[]; best: Score[] }>> {
-        if (isAllNetMaintenance(this.maintenanceStartHour, this.maintenanceEndHour)) return { err: this.allNetMaintenanceError };
+        const maintenance = this.maintenanceSchedule.getCurrentWindow();
+        if (maintenance) return { err: new AllNetMaintenanceError(maintenance, this.maintenanceService) };
         if (!Crypto.global) Crypto.global = await Crypto.new();
         const decrypted = await Crypto.global.decrypt(token);
         if (!decrypted) return { err: new FailedToDecryptError() };

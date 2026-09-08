@@ -1,6 +1,6 @@
 import { Crypto } from "@common/crypto";
 import { AllNetMaintenanceError, FailedToDecryptError } from "@common/error";
-import { isAllNetMaintenance } from "@common/maintenance";
+import { ALL_NET_MAINTENANCE, type MaintenanceSchedule } from "@common/maintenance";
 import { type Difficulty, Type } from "gcm-database/maimai";
 import type { Database } from "gcm-database-otogedb/maimai";
 import { BaseScoreAdapter, type DataOrError, FailedToFetchError } from "maidraw";
@@ -12,18 +12,15 @@ import type { NetScore } from "./lib/scraper/types";
 export class MaimaiDxNetAdapter extends BaseScoreAdapter implements MaimaiScoreAdapter {
     protected scraper = new MaimaiDxNetScraper();
 
-    public get maintenanceStartHour() {
-        return 4;
-    }
-    public get maintenanceEndHour() {
-        return 7;
-    }
+    public readonly maintenanceSchedule: MaintenanceSchedule = ALL_NET_MAINTENANCE;
+    protected readonly maintenanceService: "default" | "maimaidx-eng" | "chunithm" = "default";
     public get allNetMaintenanceError() {
-        return new AllNetMaintenanceError(this.maintenanceStartHour, this.maintenanceEndHour, "default");
+        return new AllNetMaintenanceError(this.maintenanceSchedule.getCurrentOrNextWindow(), this.maintenanceService);
     }
 
     async getPlayerInfo(token: string) {
-        if (isAllNetMaintenance(this.maintenanceStartHour, this.maintenanceEndHour)) return { err: this.allNetMaintenanceError };
+        const maintenance = this.maintenanceSchedule.getCurrentWindow();
+        if (maintenance) return { err: new AllNetMaintenanceError(maintenance, this.maintenanceService) };
         if (!Crypto.global) Crypto.global = await Crypto.new();
         const decrypted = await Crypto.global.decrypt(token);
         if (!decrypted) return { err: new FailedToDecryptError() };
@@ -65,7 +62,8 @@ export class MaimaiDxNetAdapter extends BaseScoreAdapter implements MaimaiScoreA
     }
 
     async getPlayerBest50(token: string): Promise<DataOrError<{ new: Score[]; old: Score[] }>> {
-        if (isAllNetMaintenance(this.maintenanceStartHour, this.maintenanceEndHour)) return { err: this.allNetMaintenanceError };
+        const maintenance = this.maintenanceSchedule.getCurrentWindow();
+        if (maintenance) return { err: new AllNetMaintenanceError(maintenance, this.maintenanceService) };
         if (!Crypto.global) Crypto.global = await Crypto.new();
         const decrypted = await Crypto.global.decrypt(token);
         if (!decrypted) return { err: new FailedToDecryptError() };

@@ -1,6 +1,13 @@
 import { BaseError } from "maidraw";
-import { getCurrentMaintenanceEndTime, getCurrentMaintenanceStartTime } from "./maintenance";
+import { ALL_NET_MAINTENANCE, type MaintenanceWindow } from "./maintenance";
 import { getRelativeTime } from "./relativeTime";
+
+const jstTimeFormatter = new Intl.DateTimeFormat("en-GB", {
+    timeZone: "Asia/Tokyo",
+    hour: "2-digit",
+    minute: "2-digit",
+    hourCycle: "h23",
+});
 
 export class BaseGcmError extends BaseError {
     constructor(type: string, message: string) {
@@ -14,21 +21,25 @@ export class AllNetMaintenanceError extends BaseGcmError {
         "maimaidx-eng": "maimai DX NET",
         chunithm: "CHUNITHM-NET",
     };
+    private readonly startTimestamp: number;
+    private readonly endTimestamp: number;
+
     constructor(
-        private startHour: number = 4,
-        private endHour: number = 7,
+        window: MaintenanceWindow = ALL_NET_MAINTENANCE.getCurrentOrNextWindow(),
         private service: "default" | "maimaidx-eng" | "chunithm" = "default",
     ) {
         super(
             "maintenance",
             `The ALL.Net service is currently under scheduled maintenance. You cannot use ALL.Net services, including ${AllNetMaintenanceError.servicesMap[service]}, during the maintenance.
 
-The maintenance period started at ${String(startHour).padStart(2, "0")}:00 JST (${getRelativeTime(getCurrentMaintenanceStartTime(startHour))}) and will end at ${String(endHour).padStart(2, "0")}:00 JST (${getRelativeTime(getCurrentMaintenanceEndTime(endHour))}).`,
+The maintenance period started at ${jstTimeFormatter.format(window.start)} JST (${getRelativeTime(window.start)}) and will end at ${jstTimeFormatter.format(window.end)} JST (${getRelativeTime(window.end)}).`,
         );
+        this.startTimestamp = Math.floor(window.start.getTime() / 1000);
+        this.endTimestamp = Math.floor(window.end.getTime() / 1000);
     }
     public getDiscordMarkdownContent() {
-        const startTimestamp = Math.floor(getCurrentMaintenanceStartTime(this.startHour).getTime() / 1000);
-        const endTimestamp = Math.floor(getCurrentMaintenanceEndTime(this.endHour).getTime() / 1000);
+        const startTimestamp = this.startTimestamp;
+        const endTimestamp = this.endTimestamp;
         return `The ALL.Net service is currently under scheduled maintenance. You cannot use ALL.Net services, including ${AllNetMaintenanceError.servicesMap[this.service]}, during the maintenance. 
 
 The maintenance period started at <t:${startTimestamp}:t> (<t:${startTimestamp}:R>), and will end at <t:${endTimestamp}:t> (<t:${endTimestamp}:R>).`;

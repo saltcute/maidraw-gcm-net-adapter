@@ -1,5 +1,4 @@
-import { AllNetMaintenanceError } from "@common/error";
-import { currentJstDayOfWeek } from "@common/maintenance";
+import { MAIMAIDX_ENG_MAINTENANCE, type MaintenanceSchedule } from "@common/maintenance";
 import type { Database } from "gcm-database-otogedb/maimai";
 import { MaimaiDxNetEngScraper } from "./lib/scraper/maimaidx-eng";
 import { MaimaiDxNetAdapter } from "./maimaidx-net";
@@ -7,16 +6,8 @@ import { MaimaiDxNetAdapter } from "./maimaidx-net";
 export class MaimaiDxNetEngAdapter extends MaimaiDxNetAdapter {
     protected scraper = new MaimaiDxNetEngScraper();
 
-    public get maintenanceStartHour() {
-        return 1;
-    }
-    public get maintenanceEndHour() {
-        if (currentJstDayOfWeek() === "Wednesday") return 4;
-        return 2;
-    }
-    public get allNetMaintenanceError() {
-        return new AllNetMaintenanceError(this.maintenanceStartHour, this.maintenanceEndHour, "maimaidx-eng");
-    }
+    public readonly maintenanceSchedule: MaintenanceSchedule = MAIMAIDX_ENG_MAINTENANCE;
+    protected readonly maintenanceService: "default" | "maimaidx-eng" | "chunithm" = "maimaidx-eng";
 
     constructor({
         name = "maimaidx-net-eng-adapter",
