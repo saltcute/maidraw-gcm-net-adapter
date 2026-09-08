@@ -261,18 +261,20 @@ ${errorMsg}`,
                 this.getScores(this.difficultyMap[difficulty], cookies).then(({ data: scores, err }) => {
                     if (err) return { err };
                     return {
-                        data: scores.map(async (v) => {
-                            return await database
-                                .searchChart({
-                                    title: v.name,
-                                    level: parseFloat(v.level),
-                                    difficulty,
-                                })
-                                .then(({ data }) => {
-                                    if (data[0]?.chart) v.dbChart = data[0].chart;
-                                    return v;
-                                });
-                        }),
+                        data: scores
+                            .filter((v) => !/-.+ソロver\.-$/.test(v.name))
+                            .map(async (v) => {
+                                return await database
+                                    .searchChart({
+                                        title: v.name,
+                                        level: parseFloat(v.level),
+                                        difficulty,
+                                    })
+                                    .then(({ data }) => {
+                                        if (data[0]?.chart) v.dbChart = data[0].chart;
+                                        return v;
+                                    });
+                            }),
                     };
                 }),
             );
